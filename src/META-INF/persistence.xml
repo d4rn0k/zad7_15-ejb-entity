@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<persistence xmlns="http://java.sun.com/xml/ns/persistence" version="1.0">
+    <persistence-unit name="persistence98123" transaction-type="JTA">
+
+        <exclude-unlisted-classes>false</exclude-unlisted-classes>
+        <jta-data-source>jdbc/98123</jta-data-source>
+
+    </persistence-unit>
+</persistence>

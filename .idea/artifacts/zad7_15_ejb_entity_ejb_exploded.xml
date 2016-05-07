@@ -1,0 +1,9 @@
+<component name="ArtifactManager">
+  <artifact type="exploded-ejb" name="zad7_15-ejb-entity:ejb exploded">
+    <output-path>$PROJECT_DIR$/out/artifacts/zad7_15_ejb_entity_ejb_exploded</output-path>
+    <root id="root">
+      <element id="javaee-facet-resources" facet="zad7_15-ejb-entity/ejb/EJB" />
+      <element id="module-output" name="zad7_15-ejb-entity" />
+    </root>
+  </artifact>
+</component>

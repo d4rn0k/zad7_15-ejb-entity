@@ -1,0 +1,16 @@
+<component name="ArtifactManager">
+  <artifact type="exploded-war" name="zad7_15-ejb-entity:war exploded">
+    <output-path>$PROJECT_DIR$/out/artifacts/zad7_15_ejb_entity_war_exploded</output-path>
+    <root id="root">
+      <element id="javaee-facet-resources" facet="zad7_15-ejb-entity/web/Web" />
+      <element id="directory" name="WEB-INF">
+        <element id="directory" name="classes">
+          <element id="module-output" name="zad7_15-ejb-entity" />
+        </element>
+        <element id="directory" name="lib">
+          <element id="library" level="project" name="JPA 2.0-2.0" />
+        </element>
+      </element>
+    </root>
+  </artifact>
+</component>
