@@ -100,8 +100,8 @@ public class Client {
             SimpleDateFormat sfmt = (SimpleDateFormat) fmt;
             String pattern = sfmt.toPattern();
             String localizedPattern = sfmt.toLocalizedPattern();
-            System.out.println(pattern);
-            System.out.println(localizedPattern);
+            System.err.println("pattern: " + pattern);
+            System.err.println("localizedPattern: " + localizedPattern);
         }
 
         System.err.format("data w tym: [%s] formacie to: %s\n\n", systemLocale,
