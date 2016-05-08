@@ -7,6 +7,6 @@ public class GameRemote implements IGameRemote {
 
     @Override
     public boolean register(int hwork, String album) {
-        return (hwork==6 && album.equals("98123"));
+        return hwork == 6;
     }
 }
