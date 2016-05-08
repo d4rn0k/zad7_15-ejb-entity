@@ -1,4 +1,4 @@
-use ZTP_zad7
+USE ZTP_zad7
 
 -- SQL CAPSLOCK CREW
 
