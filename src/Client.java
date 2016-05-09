@@ -10,102 +10,132 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.text.DateFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Scanner;
-//import javax.persistence.*;
 
 /**
- * Created by Konrad on 04.05.2016.
+ * Client application Class.
+ *
+ * @author Konrad Szwedo
+ * @version 0.7L
  */
 public class Client {
 
+    /**
+     * Car name for query.
+     */
     private static String carName;
+
+    /**
+     * Date for query.
+     */
     private static Date questionedDate;
 
+    /**
+     * Game Remote Bean.
+     */
     @EJB
     private static IGameRemote gameRemoteBean;
 
+    /**
+     * Main method for Client app.
+     *
+     * @param args program arguments array.
+     */
     public static void main(String[] args) {
+
         float answer = 10f;
 
         try {
+            long allClientsCount;
+            long clientsWithoutInsuranceCount;
+            EntityManagerFactory entityManagerFactory;
+            EntityManager entityManager;
+
             Client client = new Client();
             client.getParamsFromFile(args[0]);
 
-            InitialContext ctx = new InitialContext();
-            //Działa, zakomentowane bo wolno szuka beana lolololo
-//            gameRemoteBean = (IGameRemote) ctx.lookup("java:global/" +
-//                    "ejb-project/GameRemote!pl.jrj.game.IGameRemote");
-//
-//            gameRemoteBean.register(6, "98123");
+            gameRemoteBean = (IGameRemote) new InitialContext()
+                    .lookup("java:global/" +
+                            "ejb-project/GameRemote!pl.jrj.game.IGameRemote");
+            gameRemoteBean.register(7, "98123");
 
-            EntityManagerFactory emF = Persistence
+            entityManagerFactory = Persistence
                     .createEntityManagerFactory("persistence98123");
-            EntityManager em = emF.createEntityManager();
+            entityManager = entityManagerFactory.createEntityManager();
 
-            Query allClients = em.createQuery("" +
-                    "SELECT count(c) " +
-                    "FROM TbCustomerEntity c");
-
-            Query clientsWithoutInsurance = em.createQuery("" +
-                    "SELECT COUNT(c) FROM TbCustomerEntity c " +
-                    "JOIN TbInsuranceEntity i ON i.customerId=c.id " +
-                    "JOIN TbModelEntity m ON i.modelId=m.id " +
-                    "WHERE m.model =:carName " +
-                    "AND :questionedDate NOT BETWEEN i.dateFrom AND i.dateTo");
-
-            clientsWithoutInsurance.setParameter("carName", carName);
-            clientsWithoutInsurance.setParameter("questionedDate", questionedDate);
-
-            // count(*) w query zwraca liczbe typu long TAKIE CZARY
-            // http://stackoverflow.com/a/3574441/2141854
-            long allClientsCount =
-                    (long) allClients.getSingleResult();
-
-            long clientsWithoutInsuranceCount =
-                    (long) clientsWithoutInsurance.getSingleResult();
+            allClientsCount = client.getAllClientsCount(entityManager);
+            clientsWithoutInsuranceCount = client
+                    .getClientsWithoutCount(entityManager);
 
             answer = (float) clientsWithoutInsuranceCount /
                     (float) allClientsCount * 100;
-
         } catch (Exception exception) {
             answer = 20f;
-            exception.printStackTrace();
         } finally {
             System.out.format(Locale.US, "Wynik : %.1f%%\n", answer);
         }
     }
 
+    /**
+     * Returns all clients from Database count.
+     *
+     * @param em EntityManager object to perform query.
+     * @return long clients count.
+     * @throws Exception when fail casting or fail retrieve data.
+     */
+    private long getAllClientsCount(EntityManager em) throws Exception {
+        Query allClients = em.createQuery("" +
+                "SELECT COUNT(c) " +
+                "FROM TbCustomerEntity c");
+
+        return (long) allClients.getSingleResult();
+    }
+
+    /**
+     * Returns clients without insurance from Database count.
+     *
+     * @param em EntityManager object to perform query.
+     * @return clients without insurance count.
+     * @throws Exception when fail casting or fail retrieve data.
+     */
+    private long getClientsWithoutCount(EntityManager em) throws Exception {
+        Query clientsWithoutInsurance = em.createQuery("" +
+                "SELECT COUNT(c) FROM TbCustomerEntity c " +
+                "JOIN TbInsuranceEntity i ON i.customerId=c.id " +
+                "JOIN TbModelEntity m ON i.modelId=m.id " +
+                "WHERE m.model =:carName " +
+                "AND NOT :questionedDate BETWEEN i.dateFrom AND i.dateTo");
+
+        clientsWithoutInsurance.setParameter("carName", carName);
+        clientsWithoutInsurance.setParameter("questionedDate",
+                questionedDate);
+
+        return (long) clientsWithoutInsurance.getSingleResult();
+    }
+
+    /**
+     * Opens file with specified filename and parse car model
+     * and questioned date.
+     *
+     * @param fileName file to open.
+     * @return this object reference.
+     * @throws FileNotFoundException When file not found.
+     * @throws ParseException        When parse fail.
+     */
     private Client getParamsFromFile(String fileName)
             throws FileNotFoundException, ParseException {
 
+        String dateStringFromFile;
         Scanner scanner = new Scanner(new File(fileName));
 
         carName = scanner.nextLine();
-        String dateStringFromFile = scanner.nextLine();
-
-        Locale systemLocale = new Locale(System.getProperty("user.language"));
+        dateStringFromFile = scanner.nextLine();
 
         questionedDate = DateFormat
-                .getDateInstance(DateFormat.DEFAULT, systemLocale)
+                .getDateInstance(DateFormat.DEFAULT, Locale.getDefault())
                 .parse(dateStringFromFile);
-
-        DateFormat fmt = DateFormat.getDateInstance(
-                DateFormat.DEFAULT,
-                systemLocale);
-
-        if (fmt instanceof SimpleDateFormat) {
-            SimpleDateFormat sfmt = (SimpleDateFormat) fmt;
-            String pattern = sfmt.toPattern();
-            String localizedPattern = sfmt.toLocalizedPattern();
-            System.err.println("pattern: " + pattern);
-            System.err.println("localizedPattern: " + localizedPattern);
-        }
-
-        System.err.format("data w tym: [%s] formacie to: %s\n\n", systemLocale,
-                questionedDate);
 
         return this;
     }
