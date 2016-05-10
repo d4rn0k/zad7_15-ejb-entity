@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.text.DateFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Scanner;
@@ -58,7 +59,8 @@ public class Client {
 
             gameRemoteBean = (IGameRemote) new InitialContext()
                     .lookup("java:global/" +
-                            "ejb-project/GameRemote!pl.jrj.game.IGameRemote");
+                            "ejb-project/GameManager!pl.jrj.game.IGameRemote");
+
             gameRemoteBean.register(7, "98123");
 
             entityManagerFactory = Persistence
@@ -116,7 +118,7 @@ public class Client {
     }
 
     /**
-     * Opens file with specified filename and parse car model
+     * Open file with specified filename and parse car model
      * and questioned date.
      *
      * @param fileName file to open.
@@ -133,10 +135,39 @@ public class Client {
         carName = scanner.nextLine();
         dateStringFromFile = scanner.nextLine();
 
-        questionedDate = DateFormat
-                .getDateInstance(DateFormat.DEFAULT, Locale.getDefault())
-                .parse(dateStringFromFile);
+        DateFormat dfLocal = DateFormat
+                .getDateInstance(DateFormat.DEFAULT, Locale.getDefault());
+
+        DateFormat df1 = new SimpleDateFormat("dd/MM/YYYY");
+        DateFormat df2 = new SimpleDateFormat("MM/dd/YYYY");
+
+        questionedDate = tryParseDate(dfLocal, dateStringFromFile);
+
+        if (questionedDate == null) {
+            questionedDate = tryParseDate(df1, dateStringFromFile);
+        }
+
+        if (questionedDate == null) {
+            questionedDate = tryParseDate(df2, dateStringFromFile);
+        }
 
         return this;
+    }
+
+    /**
+     * Tries parse date with input date format, otherwise returns null.
+     *
+     * @param df                 DateFormat object with date format pattern
+     * @param dateStringFromFile String with date
+     * @return Date object
+     */
+    private Date tryParseDate(DateFormat df, String dateStringFromFile) {
+        Date returnDate;
+        try {
+            returnDate = df.parse(dateStringFromFile);
+        } catch (Exception exc) {
+            returnDate = null;
+        }
+        return returnDate;
     }
 }

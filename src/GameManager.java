@@ -3,7 +3,7 @@ import pl.jrj.game.IGameRemote;
 import javax.ejb.Stateless;
 
 @Stateless
-public class GameRemote implements IGameRemote {
+public class GameManager implements IGameRemote {
 
     @Override
     public boolean register(int hwork, String album) {
