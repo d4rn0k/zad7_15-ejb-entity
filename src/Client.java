@@ -50,7 +50,7 @@ public class Client {
 
         try {
             long allClientsCount;
-            long clientsWithoutInsuranceCount;
+            long clientsWithInsuranceCount;
             EntityManagerFactory entityManagerFactory;
             EntityManager entityManager;
 
@@ -68,10 +68,10 @@ public class Client {
             entityManager = entityManagerFactory.createEntityManager();
 
             allClientsCount = client.getAllClientsCount(entityManager);
-            clientsWithoutInsuranceCount = client
-                    .getClientsWithoutCount(entityManager);
+            clientsWithInsuranceCount = client
+                    .getClientsWithInsuranceCount(entityManager);
 
-            answer = (float) clientsWithoutInsuranceCount /
+            answer = (float) (allClientsCount - clientsWithInsuranceCount) /
                     (float) allClientsCount * 100;
         } catch (Exception exception) {
             answer = 20f;
@@ -96,25 +96,28 @@ public class Client {
     }
 
     /**
-     * Returns clients without insurance from Database count.
+     * Returns clients with insurance on specific car, with requested date
+     * from Database count.
      *
      * @param em EntityManager object to perform query.
-     * @return clients without insurance count.
+     * @return clients with insurance count.
      * @throws Exception when fail casting or fail retrieve data.
      */
-    private long getClientsWithoutCount(EntityManager em) throws Exception {
-        Query clientsWithoutInsurance = em.createQuery("" +
-                "SELECT COUNT(c) FROM TbCustomerEntity c " +
+    private long getClientsWithInsuranceCount(EntityManager em) throws
+            Exception {
+        Query clientsWithInsurance = em.createQuery("" +
+                "SELECT COUNT( DISTINCT c.id ) " +
+                "FROM TbCustomerEntity c " +
                 "JOIN TbInsuranceEntity i ON i.customerId=c.id " +
                 "JOIN TbModelEntity m ON i.modelId=m.id " +
                 "WHERE m.model =:carName " +
-                "AND NOT :questionedDate BETWEEN i.dateFrom AND i.dateTo");
+                "AND :questionedDate BETWEEN i.dateFrom AND i.dateTo");
 
-        clientsWithoutInsurance.setParameter("carName", carName);
-        clientsWithoutInsurance.setParameter("questionedDate",
+        clientsWithInsurance.setParameter("carName", carName);
+        clientsWithInsurance.setParameter("questionedDate",
                 questionedDate);
 
-        return (long) clientsWithoutInsurance.getSingleResult();
+        return (long) clientsWithInsurance.getSingleResult();
     }
 
     /**
